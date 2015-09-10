@@ -527,6 +527,8 @@ static RACDisposable *subscribeForever (RACSignal *signal, void (^next)(id), voi
 			}
 		};
 
+		__weak __block void (^recurComplete)(void) = completeIfAllowed;
+
 		// The signals waiting to be started.
 		//
 		// This array should only be used while synchronized on `subscriber`.
@@ -546,6 +548,7 @@ static RACDisposable *subscribeForever (RACSignal *signal, void (^next)(id), voi
 				[subscriber sendError:error];
 			} completed:^{
 				__strong void (^subscribeToSignal)(RACSignal *) = recur;
+				__strong void (^completeIfAllowed)(void) = recurComplete;
 				RACSignal *nextSignal;
 
 				@synchronized (subscriber) {
@@ -564,10 +567,6 @@ static RACDisposable *subscribeForever (RACSignal *signal, void (^next)(id), voi
 				subscribeToSignal(nextSignal);
 			}];
 		};
-
-		[compoundDisposable addDisposable:[RACDisposable disposableWithBlock:^{
-			subscribeToSignal = nil;
-		}]];
 
 		[compoundDisposable addDisposable:[self subscribeNext:^(RACSignal *signal) {
 			if (signal == nil) return;
@@ -588,6 +587,8 @@ static RACDisposable *subscribeForever (RACSignal *signal, void (^next)(id), voi
 		} error:^(NSError *error) {
 			[subscriber sendError:error];
 		} completed:^{
+			void (^completeIfAllowed)(void) = recurComplete;
+
 			@synchronized (subscriber) {
 				selfCompleted = YES;
 				completeIfAllowed();
