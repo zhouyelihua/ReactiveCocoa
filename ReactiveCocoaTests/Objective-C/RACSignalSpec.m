@@ -3000,6 +3000,19 @@ qck_it(@"should complete take: even if the signal is recursive", ^{
 	expect(@(completed)).to(beTruthy());
 });
 
+qck_fit(@"shoudlw ateer", ^{
+	RACSubject *subject = [RACSubject subject];
+
+	__block BOOL completed = NO;
+	[[subject take:1] subscribeCompleted:^{
+		completed = YES;
+	}];
+
+	[subject sendNext:nil];
+
+	expect(@(completed)).toEventually(beTruthy());
+});
+
 qck_describe(@"+zip:", ^{
 	__block RACSubject *subject1 = nil;
 	__block RACSubject *subject2 = nil;

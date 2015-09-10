@@ -565,6 +565,10 @@ static RACDisposable *subscribeForever (RACSignal *signal, void (^next)(id), voi
 			}];
 		};
 
+		[compoundDisposable addDisposable:[RACDisposable disposableWithBlock:^{
+			subscribeToSignal = nil;
+		}]];
+
 		[compoundDisposable addDisposable:[self subscribeNext:^(RACSignal *signal) {
 			if (signal == nil) return;
 

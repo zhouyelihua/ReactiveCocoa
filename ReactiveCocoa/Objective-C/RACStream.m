@@ -181,8 +181,7 @@
 				if (taken == count) *stop = YES;
 				return [class return:value];
 			} else {
-				*stop = YES;
-				return class.empty;
+				return nil;
 			}
 		};
 	}] setNameWithFormat:@"[%@] -take: %lu", self.name, (unsigned long)count];
