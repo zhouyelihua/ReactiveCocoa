@@ -1104,6 +1104,29 @@ class SignalProducerSpec: QuickSpec {
 						expect(completed).to(beTruthy())
 					}
 				}
+				
+				it("should dispose inner signals when disposed") {
+					let (inner, innerSink) = SignalProducer<String, NoError>.buffer()
+					let (outer, outerSink) = SignalProducer<SignalProducer<Bool, NoError>, NoError>.buffer()
+					let flattened = outer.flatten(.Concat)
+					
+					var disposed: Bool? = nil
+					let check = inner.flatMap(.Concat) { String -> SignalProducer<Bool, NoError> in
+						return SignalProducer<Bool, NoError> { observer, disposable in
+							disposed = disposable.disposed
+							observer.sendCompleted()
+						}
+					}
+					
+					outerSink.sendNext(check)
+					outerSink.sendCompleted()
+					
+					flattened.start().dispose()
+					
+					innerSink.sendNext("")
+					
+					expect(disposed).to(beTruthy())
+				}
 			}
 
 			describe("FlattenStrategy.Merge") {
@@ -1188,6 +1211,29 @@ class SignalProducerSpec: QuickSpec {
 						outerObserver.sendFailed(TestError.Default)
 						expect(error).to(equal(TestError.Default))
 					}
+				}
+				
+				it("should dispose inner signals when disposed") {
+					let (inner, innerSink) = SignalProducer<String, NoError>.buffer()
+					let (outer, outerSink) = SignalProducer<SignalProducer<Bool, NoError>, NoError>.buffer()
+					let flattened = outer.flatten(.Merge)
+					
+					var disposed: Bool? = nil
+					let check = inner.flatMap(.Merge) { String -> SignalProducer<Bool, NoError> in
+						return SignalProducer<Bool, NoError> { observer, disposable in
+							disposed = disposable.disposed
+							observer.sendCompleted()
+						}
+					}
+					
+					outerSink.sendNext(check)
+					outerSink.sendCompleted()
+					
+					flattened.start().dispose()
+					
+					innerSink.sendNext("")
+					
+					expect(disposed).to(beTruthy())
 				}
 			}
 
@@ -1279,6 +1325,29 @@ class SignalProducerSpec: QuickSpec {
 
 					let result = producer.take(1).last()
 					expect(result?.value).to(equal(10))
+				}
+				
+				it("should dispose inner signals when disposed") {
+					let (inner, innerSink) = SignalProducer<String, NoError>.buffer()
+					let (outer, outerSink) = SignalProducer<SignalProducer<Bool, NoError>, NoError>.buffer()
+					let flattened = outer.flatten(.Latest)
+					
+					var disposed: Bool? = nil
+					let check = inner.flatMap(.Latest) { String -> SignalProducer<Bool, NoError> in
+						return SignalProducer<Bool, NoError> { observer, disposable in
+							disposed = disposable.disposed
+							observer.sendCompleted()
+						}
+					}
+					
+					outerSink.sendNext(check)
+					outerSink.sendCompleted()
+					
+					flattened.start().dispose()
+					
+					innerSink.sendNext("")
+					
+					expect(disposed).to(beTruthy())
 				}
 			}
 
