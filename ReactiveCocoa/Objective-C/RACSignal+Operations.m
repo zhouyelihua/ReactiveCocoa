@@ -959,6 +959,26 @@ static RACDisposable *subscribeForever (RACSignal *signal, void (^next)(id), voi
 	return connection;
 }
 
+
+/*****************************************************
+ 
+ 
+ 这几个方法的实现都相当简单，只是为了简化而封装，具体说明一下：
+ 
+ - (RACMulticastConnection *)publish就是帮忙创建了RACSubject。
+ - (RACSignal *)replay就是用RACReplaySubject来作为subject，并立即执行connect操作，返回connection.signal。其作用是上面提到的replay功能，即后来的订阅者可以收到历史值。
+ - (RACSignal *)replayLast就是用Capacity为1的RACReplaySubject来替换- (RACSignal *)replay的`subject。其作用是使后来订阅者只收到最后的历史值。
+ - (RACSignal *)replayLazily和- (RACSignal *)replay的区别就是replayLazily会在第一次订阅的时候才订阅sourceSignal。
+ 所以，其实本质仍然是
+ 
+ 使用一个Subject来订阅原始信号，并让其他订阅者订阅这个Subject，这个Subject就是热信号。
+ 
+ 
+ 
+ 
+ 
+ 
+ ***************************************************/
 - (RACSignal *)replay {
 	RACReplaySubject *subject = [[RACReplaySubject subject] setNameWithFormat:@"[%@] -replay", self.name];
 

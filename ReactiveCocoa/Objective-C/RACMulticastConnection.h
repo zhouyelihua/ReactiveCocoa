@@ -77,6 +77,26 @@ RACMulticastConnection *connection = [[RACSignal createSignal:^RACDisposable *(i
 	return self.serialDisposable;
  }
 则是通过源的信号去subscribe订阅_signal.
+ 
+ 
+ 
+ 
+ 
+ 
+ 当RACSignal类的实例调用- (RACMulticastConnection *)multicast:(RACSubject *)subject时，以self和subject作为构造参数创建一个RACMulticastConnection实例。
+ RACMulticastConnection构造的时候，保存source和subject作为成员变量，创建一个RACSerialDisposable对象，用于取消订阅。
+ 当RACMulticastConnection类的实例调用- (RACDisposable *)connect这个方法的时候，判断是否是第一次。如果是的话用_signal这个成员变量来订阅sourceSignal之后返回self.serialDisposable；否则直接返回self.serialDisposable。这里面订阅sourceSignal是重点。
+ RACMulticastConnection的signal只读属性，就是一个热信号，订阅这个热信号就避免了各种副作用的问题。它会在- (RACDisposable *)connect第一次调用后，根据sourceSignal的订阅结果来传递事件。
+ 想要确保第一次订阅就能成功订阅sourceSignal，可以使用- (RACSignal *)autoconnect这个方法，它保证了第一个订阅者触发sourceSignal的订阅，也保证了当返回的信号所有订阅者都关闭连接后sourceSignal被正确关闭连接。
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
 ********************************/
 @interface RACMulticastConnection : NSObject
 

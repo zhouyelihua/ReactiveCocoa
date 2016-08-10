@@ -103,6 +103,8 @@
 	 * 
 	 * If any signal sends an error at any point, send that to the subscriber.
 	 */
+	
+	//这里有一个很重要的概念，就是任何的信号转换即是对原有的信号进行订阅从而产生新的信号。
 
 	return [[RACSignal createSignal:^(id<RACSubscriber> subscriber) {
 		RACStreamBindBlock bindingBlock = block();
