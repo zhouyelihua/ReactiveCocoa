@@ -23,6 +23,61 @@
 ///
 /// Note that you shouldn't create RACMulticastConnection manually. Instead use
 /// -[RACSignal publish] or -[RACSignal multicast:].
+/***************************
+关键用中文说明：你不能手动的去创建RACMulticastConnection，而需要通过RACSignal publish] 或者[RACSignal multicast:]来进行创建；在下文中我们可以发现publish又去调用了multicast函数
+example
+RACMulticastConnection *connection = [[RACSignal createSignal:^RACDisposable *(id<RACSubscriber> subscriber) {
+	[[RACScheduler mainThreadScheduler] afterDelay:1 schedule:^{
+		[subscriber sendNext:@1];
+	}];
+	return nil;
+}] publish];
+ 只有当[RACMulticastConnection connect]被调用的时候，多发信号（multicasted signal）才能被订阅。
+ 上述例子只有当
+ [connection connect];完成才有信号发出。。。
+ 针对本格例子可以跟踪publish来看起完成了什么
+ - (RACMulticastConnection *)publish {
+	RACSubject *subject = [[RACSubject subject] setNameWithFormat:@"[%@] -publish", self.name];
+	RACMulticastConnection *connection = [self multicast:subject];
+	return connection;
+ }
+
+ 可以看到publish的主要工作是在函数[self multicast:subject];中完成的，继续跟踪函数multicast.可以看得到是：这里又去调用RACMulticastConnection去完成initWithSourceSignal来实现对RACMulticastConnection的初始化继续跟踪RACMulticastConnection的initWithSourceSignal
+ 
+ - (RACMulticastConnection *)multicast:(RACSubject *)subject {
+	[subject setNameWithFormat:@"[%@] -multicast: %@", self.name, subject.name];
+	RACMulticastConnection *connection = [[RACMulticastConnection alloc] initWithSourceSignal:self subject:subject];
+	return connection;
+ }
+ 
+ 
+ 继续
+ - (id)initWithSourceSignal:(RACSignal *)source subject:(RACSubject *)subject {
+	NSCParameterAssert(source != nil);
+	NSCParameterAssert(subject != nil);
+ 
+	self = [super init];
+	if (self == nil) return nil;
+ 
+	_sourceSignal = source;
+	_serialDisposable = [[RACSerialDisposable alloc] init];
+	_signal = subject;
+	
+	return self;
+ }
+ 这里把创建的在publish中创建的subject复制给_signal而sourceSignal 则是创建的信号。
+ 
+ - (RACDisposable *)connect {
+	BOOL shouldConnect = OSAtomicCompareAndSwap32Barrier(0, 1, &_hasConnected);
+ 
+	if (shouldConnect) {
+ self.serialDisposable.disposable = [self.sourceSignal subscribe:_signal];
+	}
+ 
+	return self.serialDisposable;
+ }
+则是通过源的信号去subscribe订阅_signal.
+********************************/
 @interface RACMulticastConnection : NSObject
 
 /// The multicasted signal.
