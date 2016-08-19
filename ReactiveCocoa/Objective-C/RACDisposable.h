@@ -12,6 +12,23 @@
 
 /// A disposable encapsulates the work necessary to tear down and cleanup a
 /// subscription.
+
+/***************************************
+ ***************************************
+ disposable是对subscription的清理工作的封装
+ 
+ 
+ 
+ 
+ 
+ 
+ **************************************/
+
+
+
+
+
+
 @interface RACDisposable : NSObject
 
 /// Whether the receiver has been disposed.

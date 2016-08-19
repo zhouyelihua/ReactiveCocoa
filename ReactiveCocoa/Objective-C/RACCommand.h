@@ -10,6 +10,16 @@
 
 @class RACSignal;
 
+
+
+
+
+
+
+
+
+
+
 /// The domain for errors originating within `RACCommand`.
 extern NSString * const RACCommandErrorDomain;
 
@@ -24,6 +34,23 @@ extern NSString * const RACUnderlyingCommandErrorKey;
 
 /// A command is a signal triggered in response to some action, typically
 /// UI-related.
+
+
+
+
+/**************************************************
+ 
+ 
+ 很好的一个blog：http://www.yiqivr.com/2015/10/19/%E8%AF%91-ReactiveCocoa%E5%9F%BA%E7%A1%80%EF%BC%9A%E7%90%86%E8%A7%A3%E5%B9%B6%E4%BD%BF%E7%94%A8RACCommand/
+ 
+ *************************************************/
+
+
+
+
+
+
+
 @interface RACCommand : NSObject
 
 /// A signal of the signals returned by successful invocations of -execute:
@@ -35,6 +62,12 @@ extern NSString * const RACUnderlyingCommandErrorKey;
 /// 
 /// Only executions that begin _after_ subscription will be sent upon this
 /// signal. All inner signals will arrive upon the main thread.
+/**************************************************
+ 这是signal of signals 当enabled被触动的时候其就开始作用
+ 
+ 
+ 
+ *************************************************/
 @property (nonatomic, strong, readonly) RACSignal *executionSignals;
 
 /// A signal of whether this command is currently executing.
@@ -74,6 +107,18 @@ extern NSString * const RACUnderlyingCommandErrorKey;
 /// Whether the command allows multiple executions to proceed concurrently.
 ///
 /// The default value for this property is NO.
+
+
+/*******************************************************
+ 
+ signalBlock参数将在每次我们需要执行command的时候调用，这个block返回一个Signal，
+ 这个Signal代表了之前所说的执行流程。我们之前保持了默认的allowsConcurrentExecution
+ 属性为NO，这就保证了我们在完成执行block之前不会再次执行这个block。
+ 
+
+ *****************************************************/
+
+
 @property (atomic, assign) BOOL allowsConcurrentExecution;
 
 /// Invokes -initWithEnabled:signalBlock: with a nil `enabledSignal`.

@@ -22,6 +22,11 @@ static void *UIButtonEnabledDisposableKey = &UIButtonEnabledDisposableKey;
 	return objc_getAssociatedObject(self, UIButtonRACCommandKey);
 }
 
+
+
+/**********************************
+ 该函数实现了对command和enabled的绑定
+***********************************/
 - (void)setRac_command:(RACCommand *)command {
 	objc_setAssociatedObject(self, UIButtonRACCommandKey, command, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 	

@@ -11,6 +11,22 @@
 @class RACDisposable;
 @class RACSignal;
 
+
+
+
+
+
+//
+//http://tech.meituan.com/talk-about-reactivecocoas-cold-signal-and-hot-signal-part-1.html
+
+
+
+
+
+
+
+
+
 /// A multicast connection encapsulates the idea of sharing one subscription to a
 /// signal to many subscribers. This is most often needed if the subscription to
 /// the underlying signal involves side-effects or shouldn't be called more than

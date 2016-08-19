@@ -584,6 +584,7 @@ extern const NSInteger RACSignalErrorNoMatchingCase;
 /// Use of this operator should be avoided whenever possible, because the
 /// receiver's side effects may not be safe to run on another thread. If you just
 /// want to receive the signal's events on `scheduler`, use -deliverOn: instead.
+
 - (RACSignal *)subscribeOn:(RACScheduler *)scheduler;
 
 /// Creates and returns a signal that delivers its events on the main thread.
